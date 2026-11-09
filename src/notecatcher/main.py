@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 from uuid import uuid4
 
-from platformdirs import user_config_path, user_state_path
+from platformdirs import user_state_path
 from PySide6.QtCore import QMimeData, QTimer, QUrl, Signal, Qt
 from PySide6.QtGui import QAction, QFont, QImageReader, QKeySequence
 from PySide6.QtWidgets import (
@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
 )
 
 from .editor import Editor, SafeDocument
-from .config import Settings, load_settings
+from .config import Settings, default_config_path, load_settings
 from .diagnostics import configure_logging, logger, log_failure, error_detail
 from .exporter import export_note
 from .recovery import restore_snapshot, save_snapshot
@@ -319,8 +319,7 @@ def main():
         parser.exit(1, f'{error}\n')
     config_path = args.config
     if config_path is None:
-        local = Path('config.toml')
-        config_path = local if local.exists() else user_config_path('NoteCatcher') / 'config.toml'
+        config_path = default_config_path()
     try:
         settings = load_settings(config_path, required=args.config is not None)
     except (OSError, ValueError, TypeError, AttributeError) as error:

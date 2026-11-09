@@ -6,7 +6,22 @@ Copy something, press **Ctrl+Alt+N**, make any edits, and press **Ctrl+Enter** t
 
 ## Get started
 
-NoteCatcher currently requires **Windows 11**, **Python 3.13 or newer**, and **uv**. A standalone Windows executable is not available from this project yet. AutoHotkey is not needed.
+NoteCatcher runs on **Windows 11**. AutoHotkey is not needed.
+
+### Portable Windows app
+
+If you have the portable ZIP, extract the entire archive and double-click
+**NoteCatcher.exe** inside its folder. Keep the `_internal` folder beside the EXE;
+it contains the files the app needs. No Python installation is required.
+
+The app starts in the notification area near the clock. To choose where notes are
+saved, use **File → Output Folder**, or copy `config.example.toml` to `config.toml`
+beside the EXE and edit `notes_dir`. Exit and restart after editing settings.
+Recovery and logs are kept in your Windows application-data folder.
+
+### Run from the project files
+
+This option requires **Python 3.13 or newer** and **uv**.
 
 1. Install [Python](https://www.python.org/downloads/windows/) and [uv](https://docs.astral.sh/uv/getting-started/installation/).
 2. Download this project from [GitHub](https://github.com/fikebr/NoteCatcher) using **Code → Download ZIP**, then extract it.
@@ -62,7 +77,9 @@ For a permanent choice:
    notes_dir = "E:/Notes/NoteCatcher"
    ```
 
-3. Exit NoteCatcher through its tray menu and start it again from the project folder.
+3. Exit NoteCatcher through its tray menu and start it again. For the portable app,
+   keep `config.toml` beside `NoteCatcher.exe`; when running from source, keep it in
+   the project folder and start the app from there.
 
 Use forward slashes in folder paths, as shown above. You can point NoteCatcher at a folder in your QOwnNotes notebook.
 
@@ -103,7 +120,9 @@ NoteCatcher automatically keeps a local recovery copy as you edit. After an unex
 
 ## Personalize NoteCatcher
 
-Edit `config.toml` in the project folder, then exit and restart NoteCatcher to apply changes. The example file lists all available settings; omitted settings use their defaults.
+Edit `config.toml` beside the EXE (or in the project folder when running from source),
+then exit and restart NoteCatcher to apply changes. The example file lists all
+available settings; omitted settings use their defaults.
 
 Some useful options are:
 

@@ -5,6 +5,9 @@ from datetime import datetime
 from pathlib import Path
 import re
 import tomllib
+import sys
+
+from platformdirs import user_config_path
 
 
 @dataclass(frozen=True)
@@ -19,6 +22,12 @@ class Settings:
     log_level: str = 'INFO'
     cancel_shortcut: str = 'Esc'
     capture_shortcut: str = 'Ctrl+Alt+N'
+
+
+def default_config_path():
+    base = Path(sys.executable).resolve().parent if getattr(sys, 'frozen', False) else Path.cwd()
+    local = base / 'config.toml'
+    return local if local.exists() else user_config_path('NoteCatcher') / 'config.toml'
 
 
 def validate_storage(assets_dir, filename_pattern):

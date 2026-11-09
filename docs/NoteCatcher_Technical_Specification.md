@@ -1,6 +1,11 @@
 # NoteCatcher: Technical Project Specification
 
 **Status:** Milestones 1–3 implemented; Brad validated QOwnNotes viewing of generated files  
+
+Portable Windows folder/ZIP packaging is implemented in version 0.1.4. The extracted
+bundle passed isolated verification on the development machine without Python on
+PATH. Testing on another Windows machine and physical shortcut acceptance remain
+manual checks; see docs/DEVELOPMENT.md for build and verification instructions.
 **Version:** 0.1  
 **Date:** 2026-11-08  
 **Target platform:** Windows 11  
