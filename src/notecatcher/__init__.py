@@ -1,0 +1,1 @@
+"""NoteCatcher desktop note capture."""

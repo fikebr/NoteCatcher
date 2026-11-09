@@ -1,0 +1,20 @@
+[storage]
+notes_dir = "E:/Notes/NoteCatcher"
+assets_dir = "assets"
+filename_pattern = "%Y-%m-%d_%H%M%S"
+image_format = "png" # Only PNG is supported.
+
+[hotkeys]
+capture = "Ctrl+Alt+N" # Native Windows global shortcut; no AutoHotkey needed.
+save = "Ctrl+Return"
+cancel = "Esc" # Clear the draft and hide without saving or confirmation.
+
+[behavior]
+after_save = "hide" # "hide" or "stay_open"
+restore_focus = true
+
+[recovery]
+debounce_ms = 500 # 100–5000
+
+[logging]
+level = "INFO" # DEBUG, INFO, WARNING, ERROR
