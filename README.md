@@ -1,179 +1,149 @@
 # NoteCatcher
 
-A Windows desktop utility for capturing clipboard content into Markdown notes.
-The first three development milestones are implemented: rich-text capture, safe
-Markdown/PNG export, draft recovery, single-instance activation, tray lifetime,
-validated configuration, and local event logs.
-The global capture shortcut uses the native Windows API; AutoHotkey is no longer required.
+Capture text, links, and images from your clipboard and save them as Markdown notes on Windows.
 
-## Run
+Copy something, press **Ctrl+Alt+N**, make any edits, and press **Ctrl+Enter** to save. NoteCatcher stays in the system tray so it is ready for the next idea.
 
-Install Python 3.13+ and uv, then from this directory:
+## Get started
+
+NoteCatcher currently requires **Windows 11**, **Python 3.13 or newer**, and **uv**. A standalone Windows executable is not available from this project yet. AutoHotkey is not needed.
+
+1. Install [Python](https://www.python.org/downloads/windows/) and [uv](https://docs.astral.sh/uv/getting-started/installation/).
+2. Download this project from [GitHub](https://github.com/fikebr/NoteCatcher) using **Code → Download ZIP**, then extract it.
+3. Open PowerShell in the extracted project folder and run:
+
+   ```powershell
+   uv sync
+   uv run notecatcher
+   ```
+
+Look for the NoteCatcher icon in the Windows notification area, near the clock. It may be inside the hidden-icons menu. The editor starts hidden; right-click the icon and choose **Open** to show it.
+
+To start with the editor visible, use:
 
 ```powershell
-uv sync
-uv run notecatcher
-# Open the editor immediately:
 uv run notecatcher --show
-# Optional output folder:
-uv run notecatcher --notes-dir "E:/Notes/NoteCatcher"
 ```
 
-The app starts in the Windows notification area. Right-click the NoteCatcher tray
-icon for **Open**, **Capture clipboard**, **Save note**, **Preview last saved note**,
-and **Exit**. Closing the editor hides it and retains the draft. A successful save
-clears the draft, hides the editor, and attempts to restore the previously active
-application. **Exit** writes a recovery snapshot before quitting; if that fails,
-the app stays running and displays the error. If the system tray is unavailable,
-the editor runs as a normal window instead.
+Keep NoteCatcher running while you use its global capture shortcut. To quit, choose **File → Exit** or **Exit** from the tray menu.
 
-The default output is `Documents/NoteCatcher` under your home directory. Use
-**Output Folder** to change it for the current session, or copy `config.example.toml`
-to a location of your choice and launch with `--config path/to/config.toml`.
-Config precedence is `--config`, then `config.toml` in the working directory, then
-the OS app-config directory for NoteCatcher. `--notes-dir` overrides its storage
-setting. Launching from this repository uses its `config.toml`, which points to
-the notes directory configured in that file. The local `config.toml` is ignored by
-Git; copy `config.example.toml` to `config.toml` when setting up a fresh checkout.
+## Capture and save a note
 
-## Configuration
+1. Copy text, formatted text, or an image in another application.
+2. Press **Ctrl+Alt+N** to open NoteCatcher and import the clipboard.
+3. Edit your note. You can also type from scratch or paste more content.
+4. Press **Ctrl+Enter**, or choose **File → Save Markdown**.
 
-See `config.example.toml` for a complete example. Unknown keys and invalid values
-produce a startup error instead of being silently ignored. Exit the tray app and
-restart it to apply changes. Windows paths in double-quoted TOML strings should use
-forward slashes, as in the example, or escaped backslashes.
+After saving, the editor clears and hides. NoteCatcher attempts to return you to the application you were using.
 
-| Key | Default | Supported values |
-|---|---|---|
-| `storage.notes_dir` | `~/Documents/NoteCatcher` | Notes folder; `~` expands to your home directory |
-| `storage.assets_dir` | `assets` | One folder name; letters, numbers, spaces, `_` and `-` |
-| `storage.filename_pattern` | `%Y-%m-%d_%H%M%S` | Safe filename using `%Y`, `%y`, `%m`, `%d`, `%H`, `%M`, `%S`, `%f` |
-| `storage.image_format` | `png` | PNG only |
-| `hotkeys.capture` | `Ctrl+Alt+N` | Native Windows global shortcut; see supported keys below |
-| `hotkeys.save` | `Ctrl+Return` | One Qt shortcut, e.g. `Ctrl+Shift+S` |
-| `hotkeys.cancel` | `Esc` | Clear the draft and hide without saving or confirmation; editor must be focused |
-| `behavior.after_save` | `hide` | `hide` or `stay_open` |
-| `behavior.restore_focus` | `true` | Attempt focus restoration when hiding after save |
-| `recovery.debounce_ms` | `500` | Integer from 100 to 5000 |
-| `logging.level` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+Capture again before saving to append another item to the same draft. **Ctrl+V** pastes at the caret instead. An empty or unsupported clipboard leaves the current draft intact.
 
-Filename collisions receive a numeric suffix; existing notes are never overwritten.
-Asset links are URL-encoded, including spaces in custom asset folder names. Changing
-the asset folder affects new notes; it does not move existing assets.
+## Find your saved notes
 
-Use **File → Discard draft…** in the editor or **Discard draft…** in the tray menu
-to discard unsaved work. Cancel is the default. A discard clears the recovery snapshot
-on disk before clearing the editor and undo history; if that write fails, the draft
-is retained. Saved notes and their assets are kept.
+By default, notes are saved in the **NoteCatcher** folder inside your home directory's **Documents** folder.
 
-**Esc** (configurable as `hotkeys.cancel`) is a quick cancel: it clears the draft,
-undo history, and recovery snapshot, then hides the window **without confirmation
-or saving a note**. If clearing recovery fails, the draft stays visible and intact.
-Closing the window with its X button continues to preserve the draft.
+Each note is a `.md` file named with the date and time. Images are saved as PNG files in an `assets` subfolder and linked from the note. Existing notes are never overwritten.
 
-The editor uses menus instead of a toolbar. **File** contains Save Markdown,
-Reload Saved Note, Output Folder, draft actions, and Exit. Exit preserves the
-draft for recovery before quitting. **Insert** contains Import
-Clipboard, Link, Image, and Timestamp. Image inserts a selected local image at
-the caret and exports it to the note's assets folder. Timestamp inserts local
-time as `YYYY-MM-DD HH:MM:SS`. Bold and italic remain available with Ctrl+B and
-Ctrl+I; their toolbar buttons have been removed.
+You can open the saved files in QOwnNotes or another Markdown editor. QOwnNotes viewing has been validated. Keep the images with their notes when moving or sharing them so the links continue to work.
 
-**Help** stays at the right side of the menu bar. **Help → About** opens a modal
-with the app name, version, and a clickable link to the project repository.
-These values come from the installed package metadata generated by `pyproject.toml`:
-`project.name`, `project.version`, and `project.urls.Homepage`. Edit those fields,
-run `uv sync`, and restart to update About. The link label is derived from the URL.
+Choose **File → Reload Saved Note** to preview the most recently saved note. This preview does not replace your current draft.
 
-When creating the EXE with PyInstaller, use `--additional-hooks-dir packaging/hooks`.
-The included `hook-notecatcher.py` collects the package metadata and icon. This lets
-About work without a loose copy of `pyproject.toml` beside the EXE. The standalone
-PyInstaller option `--copy-metadata notecatcher` also collects the metadata, but the
-icon must still be included separately if the hook is not used. A changed version
-or homepage requires rebuilding the EXE. An EXE has not been built or tested yet.
+### Choose a different notes folder
 
-If a recovery file is damaged, it is preserved alongside the snapshot as
-`draft.corrupt-<unique-id>.json` before a new draft is created. If backup fails,
-autosave and closing are blocked to protect the original until you back it up and
-restart, or explicitly discard it. If note export succeeds but recovery cannot be
-cleared, the editor stays open with a warning: the saved file exists, and saving
-again would create a duplicate. Fix the storage problem and discard the saved draft.
+Use **File → Output Folder** to change the destination until you exit NoteCatcher. Existing notes are not moved.
 
-Logs are stored in the OS NoteCatcher state directory under `logs/notecatcher.log`.
-On Windows this is normally `%LOCALAPPDATA%/NoteCatcher/NoteCatcher/logs` (the exact
-location is selected by platformdirs). Each log is capped at 1 MB with three backups.
-Logs record event names and exception types; they omit note text, HTML, images,
-paths, exception messages, and tracebacks. Recovery snapshots themselves contain
-your unsaved note and images and remain local and unencrypted.
+For a permanent choice:
 
-## Global shortcut setup (Windows)
+1. Copy `config.example.toml` to `config.toml` in the project folder.
+2. Set the notes folder in that file, for example:
 
-1. If you used the earlier AutoHotkey script, exit it from its AHK tray icon.
-   Remove any shortcut that starts that script at login.
-2. Restart NoteCatcher with `uv run notecatcher`.
-3. Copy content and press **Ctrl+Alt+N** from another application. Edit it, then
-   press **Ctrl+Enter** to save. Capturing again appends to the existing draft.
+   ```toml
+   [storage]
+   notes_dir = "E:/Notes/NoteCatcher"
+   ```
 
-Only NoteCatcher needs to remain running. To change the shortcut, edit and restart:
+3. Exit NoteCatcher through its tray menu and start it again from the project folder.
+
+Use forward slashes in folder paths, as shown above. You can point NoteCatcher at a folder in your QOwnNotes notebook.
+
+## Editing and menus
+
+**File** lets you save, preview the last saved note, choose the output folder, discard a draft, clear and hide the editor, or exit.
+
+**Insert** lets you:
+
+- **Import Clipboard:** append the clipboard to the current draft.
+- **Link:** add a web or email link to selected text, or insert the URL itself.
+- **Image:** choose a local image file to insert at the caret.
+- **Timestamp:** insert the current local date and time.
+
+**Help → About**, at the right side of the menu bar, shows the app name, version, and a link to this project.
+
+### Keyboard shortcuts
+
+| Shortcut | Action |
+|---|---|
+| **Ctrl+Alt+N** | Open NoteCatcher and append the clipboard, from any application |
+| **Ctrl+Enter** | Save the current note while the editor is focused |
+| **Esc** | Discard the current draft and hide the editor, without confirmation |
+| **Ctrl+Shift+V** | Append the clipboard while the editor is focused |
+| **Ctrl+V** | Paste at the caret |
+| **Ctrl+B** / **Ctrl+I** | Toggle bold / italic |
+| **Alt+F** / **Alt+I** / **Alt+H** | Open File / Insert / Help |
+
+## Keep or discard an unfinished draft
+
+To keep a draft, close the editor using its **X** button. This hides the window and keeps your work. Open it again from the tray to continue. Exiting the app also preserves the draft for the next launch.
+
+**Esc permanently discards the draft without confirmation and hides the editor.** It also clears undo history and the recovery copy. It does not save a note.
+
+For a confirmation before discarding, choose **File → Discard draft…** or **Discard draft…** from the tray menu. Previously saved notes and images are kept.
+
+NoteCatcher automatically keeps a local recovery copy as you edit. After an unexpected shutdown, it restores that draft on the next launch. By default, the latest half-second of edits may not have reached recovery yet.
+
+## Personalize NoteCatcher
+
+Edit `config.toml` in the project folder, then exit and restart NoteCatcher to apply changes. The example file lists all available settings; omitted settings use their defaults.
+
+Some useful options are:
 
 ```toml
 [hotkeys]
 capture = "Ctrl+Alt+N"
+save = "Ctrl+Return"
+cancel = "Esc"
+
+[behavior]
+after_save = "hide"
+restore_focus = true
 ```
 
-Capture supports Ctrl, Alt, Shift, and Win (or Meta), plus a letter A–Z, digit 0–9,
-F1–F24 except F12, Space, Tab, Return/Enter, Esc/Escape, Insert, Delete, Home, End,
-PageUp, PageDown, or an arrow key. At least Ctrl, Alt, or Win must be included.
-Some combinations are reserved by Windows. The app registers the chord with
-`RegisterHotKey` and disables key auto-repeat. Closing the app releases the chord.
+`Ctrl+Return` is the main Enter key. Set `after_save` to `"stay_open"` to keep the editor visible after saving. Set `restore_focus` to `false` to disable the attempt to return to the previous application after hiding.
 
-If registration fails (for example, another app or the old AHK script owns the
-chord), NoteCatcher opens the editor with a diagnostic. Capture remains available
-through **Insert → Import Clipboard** and the tray menu. Choose another capture
-chord in TOML and restart to retry. The tray tooltip reflects the configured chord
-or reports that it is unavailable. There is no passive clipboard monitoring.
+The capture shortcut supports letters, digits, function keys other than F12, and common navigation keys. Include Ctrl, Alt, or Win; Shift may be added. Some combinations are already used by Windows or other applications. Save and cancel shortcuts apply only in the editor.
 
-The legacy AutoHotkey script has been removed. The local named pipe remains in use for
-single-instance activation and command-line capture requests.
+You can also change the image subfolder name and note filename pattern using the options in [config.example.toml](config.example.toml).
 
-A second `uv run notecatcher` opens the existing editor without importing the
-clipboard. `uv run notecatcher --capture` requests capture instead. Options that
-change configuration apply only when starting the resident process; exit it first
-to change those options. The process lock also protects the recovery snapshot
-from another instance in a different Windows session. That other session cannot
-activate this session's pipe and reports that the resident is unreachable.
+## Troubleshooting
 
-Use **Import Clipboard** (`Ctrl+Shift+V`) to append a capture. Standard paste
-(`Ctrl+V`) inserts at the caret using the same image-aware importer. Save with
-`Ctrl+Enter`; **Reload Saved Note** opens a read-only preview with local images.
-Notes use timestamp names and images live in `assets/`. Existing files are never
-overwritten. Draft recovery stores rich text and image bytes in the OS application
-state directory after the configured debounce and when closing the window.
+**The capture shortcut does not work.** Check that NoteCatcher is running. If it reports a shortcut conflict, choose another `capture` shortcut in `config.toml` and restart. If you used the older AutoHotkey script, exit it. You can still capture through **Insert → Import Clipboard** or the tray menu.
 
-HTML import preserves supported structural formatting and safe hyperlinks. Scripts,
-styles, and external images are omitted; paste screenshot bitmaps separately.
-Markdown cannot preserve all rich-text formatting. Import limits are 5 million text
-characters and 40 megapixels per bitmap. Export uses staged files and hard links
-on the same filesystem (NTFS supported); a filesystem without hard links reports a
-save error and retains the draft. Recovery is local and unencrypted.
+**The app will not start after changing settings.** Check the setting named in the error message. Keep text values in quotes and use `true` or `false` for switches. Compare your file with `config.example.toml`.
 
-## Development status
+**A note cannot be saved.** Your draft stays in the editor. Check that the destination drive is connected, the folder is writable, and there is enough disk space. A sync tool may temporarily lock files. Choose another output folder if needed.
 
-Tray, IPC, and hotkey integration are implemented. Windows can restrict foreground
-activation, so returning focus is best effort. Brad has validated that QOwnNotes
-can view the generated files. Login startup, executable packaging and performance
-measurements remain for later milestones. A forced exit can lose edits made during
-the configured debounce interval (half a second by default).
+**The note saved, but a recovery warning appeared.** The saved note exists. Keep the draft open until the storage problem is fixed, then use **Discard draft…** to clear it. Saving again creates another note.
 
-```powershell
-uv run pytest
-uv run ruff check .
-```
+**A recovery file is damaged.** NoteCatcher preserves a backup before starting a new draft. If it cannot make that backup, follow the message to protect the recovery file before continuing.
 
-If Dropbox locks temporary test files, put pytest's temporary directory elsewhere:
+**A web image is missing or formatting looks different.** NoteCatcher preserves supported text formatting, but Markdown cannot represent every web layout. Images referenced by pasted web pages are not downloaded automatically. Copy the image itself or use **Insert → Image**.
 
-```powershell
-uv run pytest --basetemp "$env:TEMP/NoteCatcher-tests"
-```
+**The previous application does not regain focus.** Windows can restrict focus changes. Your saved note is unaffected.
 
-See `docs/NoteCatcher_Technical_Specification.md` for the full plan.
+## Privacy and support
+
+NoteCatcher reads the clipboard only when you request a capture or paste. It does not watch clipboard history or change clipboard contents. Notes and recovery data stay on your computer unless you choose a synced folder. Recovery files are not encrypted.
+
+Diagnostic logs exclude note content and clipboard data. If you need them when reporting a problem, they are normally in `%LOCALAPPDATA%/NoteCatcher/NoteCatcher/logs`.
+
+Report a problem or request a feature through [GitHub Issues](https://github.com/fikebr/NoteCatcher/issues). Include the app version from **Help → About** and what you were doing when the problem occurred.

@@ -1,6 +1,6 @@
 [project]
 name = "NoteCatcher"
-version = "0.1.2"
+version = "0.1.3"
 description = "Keyboard-driven rich text to Markdown note capture"
 requires-python = ">=3.13"
 dependencies = ["PySide6>=6.8,<7", "platformdirs>=4,<5"]
